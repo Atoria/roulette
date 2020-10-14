@@ -14,12 +14,14 @@ class m201014_161034_create_spin_log_table extends Migration
     {
         $this->createTable('{{%spin_log}}', [
             'id' => $this->primaryKey(),
+            'bet' => $this->text(),
             'status' => $this->string(255),
-            'winning_number' => $this->decimal(20, 2),
-            'won_amount' => $this->decimal(20, 2),
+            'bet_amount' => $this->integer(11),
+            'winning_number' => $this->integer(11),
+            'won_amount' => $this->integer(11),
             'user_ip' => $this->string(255),
             'created_by' => $this->integer(11),
-            'created_at' => $this->integer(11)
+            'created_at' => $this->integer(11),
         ]);
 
         $this->addForeignKey('FK_spin_log_created_by',

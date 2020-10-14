@@ -160,6 +160,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return Yii::$app->getSecurity()->validatePassword($password, $this->password_hash);
     }
 
+    public function getFullName()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
     public function getData()
     {
         return [
@@ -168,7 +173,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'firstname' => $this->first_name,
             'lastname' => $this->last_name,
             'member_since' => Yii::$app->formatter->asDate($this->created_at, 'short'),
-            'balance' => Yii::$app->formatter->asDecimal($this->balance, 2),
+            'balance' => Yii::$app->formatter->asDecimal($this->balance / 100, 2),
             'last_active_at' => $this->last_active_at,
             'last_active_formatted' => Yii::$app->formatter->asDate($this->last_active_at)
         ];

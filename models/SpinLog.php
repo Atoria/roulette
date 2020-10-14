@@ -3,14 +3,18 @@
 namespace app\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "spin_log".
  *
  * @property int $id
+ * @property string|null $bet
  * @property string|null $status
- * @property float|null $winning_number
- * @property float|null $won_amount
+ * @property int|null $bet_amount
+ * @property int|null $winning_number
+ * @property int|null $won_amount
  * @property string|null $user_ip
  * @property int|null $created_by
  * @property int|null $created_at
@@ -19,6 +23,9 @@ use Yii;
  */
 class SpinLog extends \yii\db\ActiveRecord
 {
+    const STATUS_VALID = 'valid';
+    const STATUS_INVALID = 'invalid';
+
     /**
      * {@inheritdoc}
      */
@@ -27,15 +34,33 @@ class SpinLog extends \yii\db\ActiveRecord
         return 'spin_log';
     }
 
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => BlameableBehavior::className(),
+                'createdByAttribute' => 'created_by',
+                'updatedByAttribute' => false,
+            ],
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => false,
+            ],
+        ];
+    }
+
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['winning_number', 'won_amount'], 'number'],
-            [['created_by', 'created_at'], 'integer'],
-            [['status', 'user_ip'], 'string', 'max' => 255],
+            [['created_by', 'created_at', 'winning_number', 'won_amount', 'bet_amount'], 'integer'],
+            [['bet'], 'string'],
+            [['status', 'user_ip', ], 'string', 'max' => 255],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
         ];
     }
@@ -47,12 +72,29 @@ class SpinLog extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'bet' => 'Bet',
             'status' => 'Status',
+            'bet_amount' => 'Bet Amount',
             'winning_number' => 'Winning Number',
             'won_amount' => 'Won Amount',
             'user_ip' => 'User Ip',
             'created_by' => 'Created By',
             'created_at' => 'Created At',
+        ];
+    }
+
+
+    public function getData(){
+        return [
+            'id' => $this->id,
+            'bet' => $this->bet,
+            'status' => $this->status,
+            'bet_amount' => $this->bet_amount,
+            'winning_number' => $this->winning_number,
+            'won_amount' => $this->won_amount,
+            'user_ip' => $this->user_ip,
+            'createdBy' => $this->createdBy->getFullName(),
+            'created_at' => Yii::$app->formatter->asDate($this->created_at)
         ];
     }
 

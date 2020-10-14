@@ -22,7 +22,8 @@ class UserController extends BaseController
     protected function verbs()
     {
         return [
-            'get-balance' => ['GET']
+            'get-balance' => ['GET'],
+            'add-balance' => ['POST']
         ];
     }
 
@@ -32,8 +33,29 @@ class UserController extends BaseController
         $user = Yii::$app->user->identity;
         return [
             'success' => true,
-            'balance' => Yii::$app->formatter->asDecimal($user->balance, 2)
+            'balance' => Yii::$app->formatter->asDecimal($user->balance / 100, 2)
         ];
+    }
+
+
+    public function actionAddBalance()
+    {
+        $amount = Yii::$app->request->post('amount'); //Lets say we get amount in dollar
+        $user = Yii::$app->user->identity;
+
+        $user->balance += floatval($amount) * 100; //store in cents
+
+
+        if (!$user->save()) {
+            return 111;
+            return [
+                'success' => false,
+                'error' => $user->error
+            ];
+        }
+
+        return ['success' => true];
+
     }
 
 }
