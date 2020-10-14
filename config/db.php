@@ -1,10 +1,15 @@
 <?php
 
+//parsing xml file
+$xmlfile = file_get_contents("config/web.xml");
+$xmlJson = json_encode(simplexml_load_string($xmlfile));
+$config = json_decode($xmlJson, true);
+
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '',
+    'dsn' => 'mysql:host=' . $config['host'] .';dbname=' . $config['dbname'],
+    'username' => $config['user'],
+    'password' => $config['password'],
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)
