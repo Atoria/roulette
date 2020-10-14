@@ -50,10 +50,15 @@ class GuestController extends ActiveController
 
         $model = new LoginForm();
         if ($model->load($request->post(), '') && $model->login()) {
+            $user = $model->user;
+            $user->last_active_at = time();
+            $user->generateAccessToken();
+            $user->save();
+
             return [
                 'success' => true,
-                'data' => \Yii::$app->user->identity->getData(),
-                'accessToken' => \Yii::$app->user->identity->auth_key
+                'data' => $user->getData(),
+                'accessToken' => $user->access_token
             ];
         }
 
@@ -82,5 +87,4 @@ class GuestController extends ActiveController
 
         return ['success' => false, 'error' => $model->errors];
     }
-
 }

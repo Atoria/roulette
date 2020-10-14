@@ -25,6 +25,7 @@ class m201014_104533_create_user_table extends Migration
             'balance' => $this->integer(11)->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
+            'last_active_at' => $this->integer(11)
         ]);
     }
 

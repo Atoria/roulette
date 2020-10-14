@@ -22,6 +22,7 @@ use yii\web\IdentityInterface;
  * @property int|null $balance
  * @property int $created_at
  * @property int $updated_at
+ * @property int $last_active_at
  * @property string $password
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface
@@ -32,6 +33,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_ACTIVE = 2;
     const STATUS_DELETED = 3;
 
+    const SCENARIO_CREATE = 'create';
+    const SCENARIO_LOGIN = 'login';
 
     //Set behaviour to set user columns automatically
     public function behaviors()
@@ -59,8 +62,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['first_name', 'last_name', 'email', 'password', 'password'], 'required'],
-            [['status', 'balance', 'created_at', 'updated_at'], 'integer'],
+            [['first_name', 'last_name', 'email', 'password'], 'required', 'on' => self::SCENARIO_CREATE],
+            [['email', 'password'], 'required', 'on' => self::SCENARIO_LOGIN],
+            [['status', 'balance', 'created_at', 'updated_at', 'last_active_at'], 'integer'],
             [['first_name', 'last_name', 'password_hash', 'password_reset_token', 'email', 'password'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
             [['access_token'], 'string'],
@@ -164,7 +168,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'firstname' => $this->first_name,
             'lastname' => $this->last_name,
             'member_since' => Yii::$app->formatter->asDate($this->created_at, 'short'),
-            'balance' => Yii::$app->formatter->asDecimal($this->balance, 2)
+            'balance' => Yii::$app->formatter->asDecimal($this->balance, 2),
+            'last_active_at' => $this->last_active_at,
+            'last_active_formatted' => Yii::$app->formatter->asDate($this->last_active_at)
         ];
     }
 
