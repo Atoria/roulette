@@ -19,8 +19,7 @@
         "yiisoft/yii2-bootstrap": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "ext-json": "^1.6",
-        "ext-SimpleXML": "^7.2",
-      "ext-dom": "*"
+        "ext-SimpleXML": "^7.2"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
