@@ -24,7 +24,8 @@ class SpinController extends BaseController
     protected function verbs()
     {
         return [
-            'bet' => ['POST']
+            'bet' => ['POST'],
+            'history' => ['GET']
         ];
     }
 
@@ -65,7 +66,7 @@ class SpinController extends BaseController
             ];
         }
 
-
+        //update user balance based on result
         $user->balance += floatval($spin->won_amount) * 100 - $betAmountCents;
 
         if (!$user->save()) {
@@ -80,6 +81,35 @@ class SpinController extends BaseController
             'success' => true,
             'data' => $spin->getData()
         ];
+
+    }
+
+    public function actionHistory()
+    {
+        $request = Yii::$app->request;
+        $limit = $request->get('limit', null);
+        $offset = $request->get('offset', null);
+        $user = Yii::$app->user->identity;
+
+        $spins = SpinLog::find()->andWhere(['created_by' => $user->id]);
+        $total = $spins->count();
+        if($limit && $offset){
+            $spins->limit($limit)->offset($offset);
+        }
+        $spins = $spins->orderBy('created_at desc')->all();
+
+
+        $data = [];
+        foreach ($spins as $spin){
+            $data[] = $spin->getData();
+        }
+
+        return [
+            'success' => true,
+            'total' => $total,
+            'spins' => $data
+        ];
+
 
     }
 

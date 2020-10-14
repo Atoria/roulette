@@ -87,13 +87,8 @@ class SpinLog extends \yii\db\ActiveRecord
     public function getData(){
         return [
             'id' => $this->id,
-            'bet' => $this->bet,
-            'status' => $this->status,
             'bet_amount' => $this->bet_amount,
-            'winning_number' => $this->winning_number,
             'won_amount' => $this->won_amount,
-            'user_ip' => $this->user_ip,
-            'createdBy' => $this->createdBy->getFullName(),
             'created_at' => Yii::$app->formatter->asDate($this->created_at)
         ];
     }
