@@ -14,6 +14,7 @@ use yii\web\IdentityInterface;
  * @property string $first_name
  * @property string $last_name
  * @property string $auth_key
+ * @property string $access_token
  * @property string $password_hash
  * @property string|null $password_reset_token
  * @property string $email
@@ -62,6 +63,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             [['status', 'balance', 'created_at', 'updated_at'], 'integer'],
             [['first_name', 'last_name', 'password_hash', 'password_reset_token', 'email', 'password'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
+            [['access_token'], 'string'],
             [['first_name', 'last_name', 'email'], 'unique'],
             [['password_reset_token'], 'unique'],
         ];
@@ -108,7 +110,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return static::find()
             ->active()
-            ->andWhere(['auth_key' => $token, 'status' => self::STATUS_ACTIVE])
+            ->andWhere(['access_token' => $token, 'status' => self::STATUS_ACTIVE])
             ->one();
     }
 
@@ -133,6 +135,10 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         $this->password_hash = Yii::$app->security->generatePasswordHash($password);
     }
 
+    public function generateAccessToken()
+    {
+        $this->access_token = Yii::$app->security->generateRandomString();
+    }
 
     public function generateAuthKey()
     {

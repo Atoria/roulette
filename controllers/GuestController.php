@@ -12,7 +12,7 @@ use yii\rest\ActiveController;
 /**
  * Class GuestController
  */
-class GuestController extends BaseController
+class GuestController extends ActiveController
 {
     public $modelClass = 'models\EmptyModel';
 
@@ -26,7 +26,7 @@ class GuestController extends BaseController
             'login' => ['OPTIONS', 'POST'],
             'update' => ['PUT', 'PATCH'],
             'delete' => ['DELETE'],
-            'register' => ['POST']
+            'register' => ['POST'],
         ];
     }
 
@@ -73,6 +73,7 @@ class GuestController extends BaseController
             $model->status = User::STATUS_ACTIVE;
             $model->setPassword($model->password);
             $model->generateAuthKey();
+            $model->generateAccessToken();
 
             if ($model->save()) {
                 return ['success' => true];

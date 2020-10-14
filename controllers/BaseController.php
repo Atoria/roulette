@@ -3,6 +3,9 @@
 
 namespace app\controllers;
 
+use yii\filters\auth\CompositeAuth;
+use yii\filters\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 
 
@@ -37,7 +40,16 @@ class BaseController extends ActiveController
         ];
 
 
-
+        $behaviors['authenticator'] = [
+            'class' => CompositeAuth::className(),
+            'authMethods' => [
+                HttpBearerAuth::className(),
+                QueryParamAuth::className(),
+            ],
+            'except' => ['options']
+        ];
+        // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)
+        $behaviors['authenticator']['except'] = ['options'];
         return $behaviors;
     }
 }
