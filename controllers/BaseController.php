@@ -61,7 +61,9 @@ class BaseController extends ActiveController
     {
         $user = \Yii::$app->user->identity;
         $currentTime = time();
+        //if user is not already logged out
         if ($user && $user->access_token) {
+            //check if 5 minute is passed, if so reset access token to invalidate request later
             if ($currentTime - $user->last_active_at > 3000) {
                 $user->access_token = null;
                 $user->save();
@@ -71,6 +73,7 @@ class BaseController extends ActiveController
                 ]);
                 return false;
             } else {
+                //update activity time
                 $user->last_active_at = $currentTime;
                 $user->save();
             }
