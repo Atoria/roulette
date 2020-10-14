@@ -3,6 +3,8 @@
 namespace app\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\web\IdentityInterface;
 
 /**
@@ -19,13 +21,28 @@ use yii\web\IdentityInterface;
  * @property int|null $balance
  * @property int $created_at
  * @property int $updated_at
+ * @property string $password
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
+    public $password;
 
     const STATUS_NOT_ACTIVE = 1;
     const STATUS_ACTIVE = 2;
     const STATUS_DELETED = 3;
+
+
+    //Set behaviour to set user columns automatically
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -41,12 +58,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['first_name', 'last_name', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at'], 'required'],
+            [['first_name', 'last_name', 'email', 'password', 'password'], 'required'],
             [['status', 'balance', 'created_at', 'updated_at'], 'integer'],
-            [['first_name', 'last_name', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
+            [['first_name', 'last_name', 'password_hash', 'password_reset_token', 'email', 'password'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
-            [['username'], 'unique'],
-            [['email'], 'unique'],
+            [['first_name', 'last_name', 'email'], 'unique'],
             [['password_reset_token'], 'unique'],
         ];
     }
@@ -92,7 +108,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return static::find()
             ->active()
-            ->andWhere(['access_token' => $token, 'status' => self::STATUS_ACTIVE])
+            ->andWhere(['auth_key' => $token, 'status' => self::STATUS_ACTIVE])
             ->one();
     }
 
@@ -111,11 +127,33 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->getAuthKey() === $authKey;
     }
 
+
+    public function setPassword($password)
+    {
+        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+    }
+
+
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+
+    public static function findByEmail($email)
+    {
+        return self::find()->andWhere(['status' => self::STATUS_ACTIVE])->andWhere(['email' => $email])->one();
+    }
+
+    public function validatePassword($password)
+    {
+        return Yii::$app->getSecurity()->validatePassword($password, $this->password_hash);
+    }
+
     public function getData()
     {
         return [
             'id' => $this->id,
-            'username' => $this->username,
             'email' => $this->email,
             'firstname' => $this->first_name,
             'lastname' => $this->last_name,

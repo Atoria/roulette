@@ -1,7 +1,7 @@
 <?php
 
 
-namespace frontend\modules\api\v1\controllers;
+namespace app\controllers;
 
 use yii\rest\ActiveController;
 
@@ -35,6 +35,8 @@ class BaseController extends ActiveController
                 ],
             ]
         ];
+
+
 
         return $behaviors;
     }
