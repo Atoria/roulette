@@ -9,7 +9,8 @@ use yii\web\IdentityInterface;
  * This is the model class for table "user".
  *
  * @property int $id
- * @property string $username
+ * @property string $first_name
+ * @property string $last_name
  * @property string $auth_key
  * @property string $password_hash
  * @property string|null $password_reset_token
@@ -40,9 +41,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at'], 'required'],
+            [['first_name', 'last_name', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at'], 'required'],
             [['status', 'balance', 'created_at', 'updated_at'], 'integer'],
-            [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
+            [['first_name', 'last_name', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
@@ -57,7 +58,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             'id' => 'ID',
-            'username' => 'Username',
+            'first_name' => 'First Name',
+            'last_name' => 'Last Name',
             'auth_key' => 'Auth Key',
             'password_hash' => 'Password Hash',
             'password_reset_token' => 'Password Reset Token',
@@ -108,4 +110,18 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->getAuthKey() === $authKey;
     }
+
+    public function getData()
+    {
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'email' => $this->email,
+            'firstname' => $this->first_name,
+            'lastname' => $this->last_name,
+            'member_since' => Yii::$app->formatter->asDate($this->created_at, 'short'),
+            'balance' => Yii::$app->formatter->asDecimal($this->balance, 2)
+        ];
+    }
+
 }
