@@ -4,6 +4,7 @@
 namespace app\controllers;
 
 use app\core\CheckBets;
+use app\models\KeyStorage;
 use app\models\LoginForm;
 use app\models\SpinLog;
 use app\models\User;
@@ -36,6 +37,7 @@ class SpinController extends BaseController
         $bet = $request->post('bet');
         $user = Yii::$app->user->identity;
 
+        $transaction = Yii::$app->db->beginTransaction();
         $spin = new SpinLog();
         $spin->bet = $bet; //Store bet
         $spin->user_ip = Yii::$app->request->getUserIP(); //Get user Ip
@@ -47,7 +49,9 @@ class SpinController extends BaseController
 
         $betAmountCents = floatval($spin->bet_amount) * 100;
 
+
         if ($betAmountCents > $user->balance) {
+            $transaction->rollBack();
             return [
                 'success' => false,
                 'error' => 'Not enough money on balance. Current Balance: ' . Yii::$app->formatter->asDecimal($user->balance / 100, 2) . ' betting: ' . Yii::$app->formatter->asDecimal($spin->bet_amount, 2)
@@ -60,6 +64,7 @@ class SpinController extends BaseController
         $spin->won_amount = $checkInstance->EstimateWin($bet, $spin->winning_number);
 
         if (!$spin->save()) {
+            $transaction->rollBack();
             return [
                 'success' => false,
                 'error' => $spin->errors
@@ -70,6 +75,7 @@ class SpinController extends BaseController
         $user->balance += floatval($spin->won_amount) * 100 - $betAmountCents;
 
         if (!$user->save()) {
+            $transaction->rollBack();
             return [
                 'success' => false,
                 'error' => $user->errors
@@ -77,6 +83,26 @@ class SpinController extends BaseController
         }
 
 
+        $jackpot = KeyStorage::find()->andWhere(['key' => KeyStorage::JACKPOT_KEY])->one();
+        if (!$jackpot) {
+            $jackpot = new KeyStorage();
+            $jackpot->key = KeyStorage::JACKPOT_KEY;
+            $jackpot->value = 0;
+        }
+
+
+        $jackpot->value = (string)($spin->bet_amount + intval($jackpot->value));
+
+        if (!$jackpot->save()) {
+            $transaction->rollBack();
+            return [
+                'success' => false,
+                'error' => $jackpot->errors
+            ];
+        }
+
+
+        $transaction->commit();
         return [
             'success' => true,
             'data' => $spin->getData()
@@ -93,14 +119,14 @@ class SpinController extends BaseController
 
         $spins = SpinLog::find()->andWhere(['created_by' => $user->id]);
         $total = $spins->count();
-        if($limit && $offset){
+        if ($limit && $offset) {
             $spins->limit($limit)->offset($offset);
         }
         $spins = $spins->orderBy('created_at desc')->all();
 
 
         $data = [];
-        foreach ($spins as $spin){
+        foreach ($spins as $spin) {
             $data[] = $spin->getData();
         }
 
