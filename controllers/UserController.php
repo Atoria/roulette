@@ -38,6 +38,7 @@ class UserController extends BaseController
     }
 
 
+    //Additional method add balance.
     public function actionAddBalance()
     {
         $amount = Yii::$app->request->post('amount'); //Lets say we get amount in dollar
@@ -47,7 +48,6 @@ class UserController extends BaseController
 
 
         if (!$user->save()) {
-            return 111;
             return [
                 'success' => false,
                 'error' => $user->error

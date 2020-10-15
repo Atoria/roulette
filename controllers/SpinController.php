@@ -47,8 +47,7 @@ class SpinController extends BaseController
         $spin->status = $validateBet->getIsValid() ? SpinLog::STATUS_VALID : SpinLog::STATUS_INVALID;
         $spin->bet_amount = $validateBet->getBetAmount();
 
-        $betAmountCents = floatval($spin->bet_amount) * 100;
-
+        $betAmountCents = floatval($spin->bet_amount) * 100; // convert dollars to cents
 
         if ($betAmountCents > $user->balance) {
             $transaction->rollBack();
@@ -57,7 +56,6 @@ class SpinController extends BaseController
                 'error' => 'Not enough money on balance. Current Balance: ' . Yii::$app->formatter->asDecimal($user->balance / 100, 2) . ' betting: ' . Yii::$app->formatter->asDecimal($spin->bet_amount, 2)
             ];
         }
-
 
         //Get Estimate Win
         $spin->winning_number = rand(0, 36);
@@ -101,12 +99,9 @@ class SpinController extends BaseController
             ];
         }
 
-
-
-
         $ch = curl_init( Yii::$app->params['socketUrl'] );
         //Setup request to send json via POST.
-        $payload = json_encode( ["jackpot"=> $jackpot->value] );
+        $payload = json_encode( ["jackpot"=> $jackpot->value / 100] );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $payload );
         curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
         //return response instead of printing.
@@ -132,11 +127,11 @@ class SpinController extends BaseController
 
         $spins = SpinLog::find()->andWhere(['created_by' => $user->id]);
         $total = $spins->count();
+        //If there is pagination from frontend paginate
         if ($limit && $offset) {
             $spins->limit($limit)->offset($offset);
         }
         $spins = $spins->orderBy('created_at desc')->all();
-
 
         $data = [];
         foreach ($spins as $spin) {
@@ -148,9 +143,6 @@ class SpinController extends BaseController
             'total' => $total,
             'spins' => $data
         ];
-
-
     }
-
 
 }

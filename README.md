@@ -10,6 +10,6 @@ Project setup:
 
 Run: composer install
 
-Running migrations: php yii migrate
+Running migrations: `php yii migrate`
 
 Run node server: `node socket/server.js`

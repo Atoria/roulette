@@ -47,12 +47,11 @@ class GuestController extends ActiveController
     {
         $request = \Yii::$app->request;
 
-
         $model = new LoginForm();
         if ($model->load($request->post(), '') && $model->login()) {
             $user = $model->user;
-            $user->last_active_at = time();
-            $user->generateAccessToken();
+            $user->last_active_at = time(); //set initial activate time
+            $user->generateAccessToken(); //generate new access token
             $user->save();
 
             return [
