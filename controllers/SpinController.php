@@ -102,6 +102,19 @@ class SpinController extends BaseController
         }
 
 
+
+
+        $ch = curl_init( Yii::$app->params['socketUrl'] );
+        //Setup request to send json via POST.
+        $payload = json_encode( ["jackpot"=> $jackpot->value] );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $payload );
+        curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        //return response instead of printing.
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        //Send request.
+        $result = curl_exec($ch);
+        curl_close($ch);
+
         $transaction->commit();
         return [
             'success' => true,

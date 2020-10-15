@@ -1,0 +1,12 @@
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script>
+  $(document).ready(function () {
+    // Connect to our node/websockets server
+    var socket = io.connect('http://localhost:3000');
+    // New note emitted, add it to our list of current notes
+    socket.on('jackpot', function (data) {
+      alert("Jackpot" + data)
+    })
+  })
+</script>
