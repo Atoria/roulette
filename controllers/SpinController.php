@@ -80,15 +80,13 @@ class SpinController extends BaseController
             ];
         }
 
-
+        //Update Jackpot value
         $jackpot = KeyStorage::find()->andWhere(['key' => KeyStorage::JACKPOT_KEY])->one();
         if (!$jackpot) {
             $jackpot = new KeyStorage();
             $jackpot->key = KeyStorage::JACKPOT_KEY;
             $jackpot->value = 0;
         }
-
-
         $jackpot->value = (string)($spin->bet_amount + intval($jackpot->value));
 
         if (!$jackpot->save()) {
@@ -125,12 +123,14 @@ class SpinController extends BaseController
         $offset = $request->get('offset', null);
         $user = Yii::$app->user->identity;
 
+        //Filter by user
         $spins = SpinLog::find()->andWhere(['created_by' => $user->id]);
         $total = $spins->count();
         //If there is pagination from frontend paginate
         if ($limit && $offset) {
             $spins->limit($limit)->offset($offset);
         }
+        //Order by newest
         $spins = $spins->orderBy('created_at desc')->all();
 
         $data = [];
